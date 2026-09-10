@@ -22,8 +22,13 @@ app.Run(async context =>
     }
     finally
     {
-        var ct = new CancellationTokenSource(TimeSpan.FromSeconds(5)).Token;
-        await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Closing", ct);
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            await socket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, "Closing", cts.Token);
+        }
+        catch (WebSocketException) { }
+        catch (OperationCanceledException) { }
     }
 });
 
